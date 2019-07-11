@@ -37,6 +37,16 @@ functions:
         path: /some-entity/{entityId}
         method: GET
         request:
+          template: |-
+            Some velocity template that includes this properties:
+            - headers
+            - method
+            - query
+            - body
+            - requestPath
+
+            Native support for this template en Serverless Framework was suggested in https://github.com/serverless/serverless/issues/6364
+            Sample template to use in serverless response template [here](docs/request-template-demo.yml)
           parameters:
             paths:
               entityId: true
