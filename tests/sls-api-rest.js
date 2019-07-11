@@ -184,6 +184,39 @@ describe('SlsApiRest', () => {
 			});
 		});
 
+		it('Should replace the path variables in the endpoint', async () => {
+
+			sandbox.stub(ApiResponse, 'send');
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+			dispatcherStub.dispatch.resolves({
+				code: 200,
+				body: {
+					foo: 'bar'
+				}
+			});
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			await SlsApiRest.handler({
+				requestPath: '/some-entity/{entityId}/sub-entity/{subEntityId}',
+				path: {
+					entityId: 1,
+					subEntityId: 2
+				}
+			});
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: '/some-entity/1/sub-entity/2',
+				method: 'get',
+				headers: {},
+				cookies: {},
+				data: {}
+			});
+		});
+
 		it('Should pass the request arguments (with querystring) to the Dispatcher and map the dispatcher result', async () => {
 
 			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
