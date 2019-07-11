@@ -13,7 +13,6 @@ npm install @janiscommerce/sls-api-rest
 
 # Usage
 
-- API Browse Data
 ```js
 'use strict';
 
