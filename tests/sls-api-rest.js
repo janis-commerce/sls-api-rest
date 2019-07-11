@@ -14,7 +14,7 @@ describe('SlsApiRest', () => {
 	describe('getDispatcher', () => {
 
 		const validParams = {
-			endpoint: '/some-entity/1/sub-entity/2',
+			endpoint: 'some-entity/1/sub-entity/2',
 			method: 'post',
 			headers: {
 				'x-foo': 'bar'
@@ -104,7 +104,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'get',
 				headers: {},
 				cookies: {},
@@ -136,7 +136,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'get',
 				headers: {
 					cookie: 'foo=bar'
@@ -172,7 +172,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'get',
 				headers: {
 					Cookie: 'foo=bar'
@@ -209,7 +209,36 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
+				method: 'get',
+				headers: {},
+				cookies: {},
+				data: {}
+			});
+		});
+
+		it('Should trim the first slash in the endpoint', async () => {
+
+			sandbox.stub(ApiResponse, 'send');
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+			dispatcherStub.dispatch.resolves({
+				code: 200,
+				body: {
+					foo: 'bar'
+				}
+			});
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			await SlsApiRest.handler({
+				requestPath: '/some-entity'
+			});
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: 'some-entity',
 				method: 'get',
 				headers: {},
 				cookies: {},
@@ -249,7 +278,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'get',
 				headers: {
 					'x-foo': 'bar'
@@ -300,7 +329,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'get',
 				headers: {
 					'x-foo': 'bar'
@@ -352,7 +381,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
@@ -403,7 +432,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
@@ -450,7 +479,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
@@ -501,7 +530,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: '/some-entity/1/sub-entity/2',
+				endpoint: 'some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
