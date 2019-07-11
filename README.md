@@ -16,9 +16,9 @@ npm install @janiscommerce/sls-api-rest
 ```js
 'use strict';
 
-const { SlsApi } = require('@janiscommerce/sls-api-rest');
+const { SlsApiRest } = require('@janiscommerce/sls-api-rest');
 
-module.exports.handler = (...args) => SlsApi.handler(...args);
+module.exports.handler = (...args) => SlsApiRest.handler(...args);
 ```
 
 
