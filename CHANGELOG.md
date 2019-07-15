@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0] - 2019-07-15
+### Changed
+- Updated `api` package version
+
 ## [1.1.1] - 2019-07-11
 ### Fixed
 - Enpoints starting with a slash are now being fixed
