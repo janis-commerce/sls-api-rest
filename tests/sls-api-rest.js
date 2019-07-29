@@ -297,7 +297,9 @@ describe('SlsApiRest', () => {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
-				}
+				},
+				headers: undefined,
+				cookies: undefined
 			});
 		});
 
@@ -345,7 +347,9 @@ describe('SlsApiRest', () => {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
-				}
+				},
+				headers: undefined,
+				cookies: undefined
 			});
 		});
 
@@ -399,7 +403,9 @@ describe('SlsApiRest', () => {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
-				}
+				},
+				headers: undefined,
+				cookies: undefined
 			});
 		});
 
@@ -448,7 +454,9 @@ describe('SlsApiRest', () => {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
-				}
+				},
+				headers: undefined,
+				cookies: undefined
 			});
 		});
 
