@@ -13,7 +13,7 @@ npm install @janiscommerce/sls-api-rest
 
 ## Dependencies
 
-This package only works properly with serverless-offline@5.8.1 or greater
+This package only works properly with serverless-offline@5.9.0 or greater
 
 ## Usage
 
