@@ -40,6 +40,9 @@ functions:
         path: /some-entity/{entityId}
         method: GET
         request:
+          parameters:
+            paths:
+              entityId: true
           # Some velocity template that includes this properties:
           # - headers
           # - method
@@ -47,11 +50,9 @@ functions:
           # - body
           # - requestPath
           # Native support for this template en Serverless Framework was suggested in https://github.com/serverless/serverless/issues/6364
+          # Still needed to work with serverless-offline
           template: ${file(./serverless/functions/subtemplates/lambda-request-with-path.yml)}
-          parameters:
-            paths:
-              entityId: true
-        # The response configuration to support error handling as desired
+        # The response configuration to properly format body and headers + Error handling
         response: ${file(./serverless/functions/subtemplates/lambda-response-with-cors.yml)}
         # This is for serverless-offline only, because it doesn't use the `response` property (yet)
         responses: ${file(./serverless/functions/subtemplates/lambda-serverless-offline-responses.yml)}

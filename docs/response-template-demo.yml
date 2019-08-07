@@ -1,32 +1,7 @@
 headers:
   Access-Control-Allow-Credentials: "'true'"
   Access-Control-Allow-Origin: "'*'"
+  Access-Control-Expose-Headers: "'x-janis-total'"
   Set-Cookie: "integration.response.header.Set-Cookie"
-statusCodes:
-  200:
-    pattern: ''
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  400:
-    pattern: '[\s\S]*"statusCode":400[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  401:
-    pattern: '[\s\S]*"statusCode":401[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  403:
-    pattern: '[\s\S]*"statusCode":403[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  404:
-    pattern: '[\s\S]*"statusCode":404[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  422:
-    pattern: '[\s\S]*"statusCode":422[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  500:
-    pattern: '[\s\S]*(Process\s?exited\s?before\s?completing\s?request|"statusCode":500)[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  502:
-    pattern: '[\s\S]*"statusCode":502[\s\S]*'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
-  504:
-    pattern: '([\s\S]*"statusCode":504[\s\S]*)|(.*[ Task timed out ].*)'
-    template: "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\")#set($origin = $input.params(\"origin\"))#end\n#if($origin != \"\")\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#if($input.path(\"$.errorMessage\") != \"\")\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"
+  x-janis-total: "integration.response.header.x-janis-total"
+template: "#set($origin = $input.params(\"Origin\"))\n#if(!$origin)#set($origin = $input.params(\"origin\"))#end\n#if($origin)\n#set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end\n#set($setCookie = $input.path(\"$.headers.Set-Cookie\"))\n#if($setCookie)\n#set($context.responseOverride.header.Set-Cookie = $setCookie)\n#end\n#if($input.path(\"$.errorMessage\"))\n#set($errorMessageObj = $util.parseJson($input.path(\"$.errorMessage\")))\n{\"message\":\"$errorMessageObj.body.message\"}\n#else\n$input.json(\"$.body\")\n#end"

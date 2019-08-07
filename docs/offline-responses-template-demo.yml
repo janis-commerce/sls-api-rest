@@ -4,6 +4,7 @@ default:
   responseParameters:
     method.response.header.Access-Control-Allow-Credentials: "'true'"
     method.response.header.Access-Control-Allow-Origin: "'*'"
+    method.response.header.Access-Control-Expose-Headers: "'x-janis-total'"
     method.response.header.x-janis-total: "integration.response.body.headers.x-janis-total"
     method.response.header.Set-Cookie: "integration.response.body.headers.Set-Cookie"
   responseTemplates:
