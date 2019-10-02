@@ -553,10 +553,10 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				authorizer: {
-					janisAuth: {
+					janisAuth: JSON.stringify({
 						clientId: 1,
 						clientCode: 'fizzmod'
-					}
+					})
 				}
 			});
 

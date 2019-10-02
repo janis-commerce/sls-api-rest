@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.2] - 2019-10-02
+### Fixed
+- Authorizer context is now JSON parsed
+
 ## [1.4.1] - 2019-10-02
 ### Fixed
 - Docs serverless templates fixed
