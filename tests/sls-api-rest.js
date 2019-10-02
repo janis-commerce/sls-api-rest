@@ -21,6 +21,10 @@ describe('SlsApiRest', () => {
 			},
 			cookies: {
 				someCookie: 'baz'
+			},
+			authenticationData: {
+				clientId: 1,
+				clientCode: 'fizzmod'
 			}
 		};
 
@@ -47,6 +51,11 @@ describe('SlsApiRest', () => {
 			assert.throws(() => SlsApiRest.getDispatcher({
 				...validParams,
 				cookies: ['invalid']
+			}));
+
+			assert.throws(() => SlsApiRest.getDispatcher({
+				...validParams,
+				authenticationData: ['invalid']
 			}));
 		});
 
@@ -108,7 +117,8 @@ describe('SlsApiRest', () => {
 				method: 'get',
 				headers: {},
 				cookies: {},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 		});
 
@@ -144,7 +154,8 @@ describe('SlsApiRest', () => {
 				cookies: {
 					foo: 'bar'
 				},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 		});
 
@@ -180,7 +191,8 @@ describe('SlsApiRest', () => {
 				cookies: {
 					foo: 'bar'
 				},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 		});
 
@@ -213,7 +225,8 @@ describe('SlsApiRest', () => {
 				method: 'get',
 				headers: {},
 				cookies: {},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 		});
 
@@ -242,7 +255,8 @@ describe('SlsApiRest', () => {
 				method: 'get',
 				headers: {},
 				cookies: {},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 		});
 
@@ -287,7 +301,8 @@ describe('SlsApiRest', () => {
 				data: {
 					sortBy: 'id',
 					sortDirection: 'asc'
-				}
+				},
+				authenticationData: {}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
@@ -337,7 +352,8 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {}
+				data: {},
+				authenticationData: {}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
@@ -393,7 +409,8 @@ describe('SlsApiRest', () => {
 				cookies: {},
 				data: {
 					someProp: 'baz'
-				}
+				},
+				authenticationData: {}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
@@ -444,7 +461,120 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {}
+				data: {},
+				authenticationData: {}
+			});
+
+			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+
+			sandbox.assert.calledOnce(apiResponseStub);
+			sandbox.assert.calledWithExactly(apiResponseStub, {
+				statusCode: 200,
+				body: {
+					foo: 'bar'
+				},
+				headers: undefined,
+				cookies: undefined
+			});
+		});
+
+		it('Should pass the request arguments (without authentication data) to the Dispatcher and map the dispatcher result', async () => {
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+			dispatcherStub.dispatch.resolves({
+				code: 200,
+				body: {
+					foo: 'bar'
+				}
+			});
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
+			apiResponseStub.returns('the actual response');
+
+			const apiResponse = await SlsApiRest.handler({
+				requestPath: '/some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				authorizer: {}
+			});
+
+			assert.deepStrictEqual(apiResponse, 'the actual response');
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: 'some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				cookies: {},
+				data: {},
+				authenticationData: {}
+			});
+
+			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+
+			sandbox.assert.calledOnce(apiResponseStub);
+			sandbox.assert.calledWithExactly(apiResponseStub, {
+				statusCode: 200,
+				body: {
+					foo: 'bar'
+				},
+				headers: undefined,
+				cookies: undefined
+			});
+		});
+
+		it('Should pass the request arguments (with authentication data) to the Dispatcher and map the dispatcher result', async () => {
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+			dispatcherStub.dispatch.resolves({
+				code: 200,
+				body: {
+					foo: 'bar'
+				}
+			});
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
+			apiResponseStub.returns('the actual response');
+
+			const apiResponse = await SlsApiRest.handler({
+				requestPath: '/some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				authorizer: {
+					janisAuth: {
+						clientId: 1,
+						clientCode: 'fizzmod'
+					}
+				}
+			});
+
+			assert.deepStrictEqual(apiResponse, 'the actual response');
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: 'some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				cookies: {},
+				data: {},
+				authenticationData: {
+					clientId: 1,
+					clientCode: 'fizzmod'
+				}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
@@ -495,7 +625,8 @@ describe('SlsApiRest', () => {
 				cookies: {},
 				data: {
 					someProp: 'baz'
-				}
+				},
+				authenticationData: {}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
@@ -546,7 +677,8 @@ describe('SlsApiRest', () => {
 				cookies: {},
 				data: {
 					someProp: 'baz'
-				}
+				},
+				authenticationData: {}
 			});
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
