@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.1] - 2019-10-02
+### Fixed
+- Docs serverless templates fixed
+
 ## [1.4.0] - 2019-10-02
 ### Added
 - Lambda authorizer context handling (requires API v4.1.1+ to work properly)
