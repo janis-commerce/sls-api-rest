@@ -1,6 +1,6 @@
 {
   "name": "@janiscommerce/sls-api-rest",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "An integration handler for Serverless and JANIS Rest APIs",
   "main": "lib/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-import": "^2.20.2",
     "husky": "^2.4.1",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
@@ -33,8 +33,8 @@
     "test": "tests"
   },
   "dependencies": {
-    "@janiscommerce/api": "^4.2.1",
-    "@janiscommerce/sls-api-response": "^1.2.0",
+    "@janiscommerce/api": "^4.2.3",
+    "@janiscommerce/sls-api-response": "^1.2.1",
     "amazon-api-gateway-querystring": "^1.0.5"
   }
 }
