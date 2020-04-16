@@ -1,6 +1,6 @@
 {
   "name": "@janiscommerce/sls-api-rest",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "An integration handler for Serverless and JANIS Rest APIs",
   "main": "lib/index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "@janiscommerce/api": "^4.2.3",
+    "@janiscommerce/api": "^4.2.4",
     "@janiscommerce/sls-api-response": "^1.2.1",
     "amazon-api-gateway-querystring": "^1.0.5"
   }
