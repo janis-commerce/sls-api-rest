@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2020-06-18
+### Changed
+- API upgraded to v5 (`api-session` validates locations) (**BREAKING CHANGE**)
+
 ## [1.5.0] - 2020-05-19
 ### Removed
 - `package-lock.json` file

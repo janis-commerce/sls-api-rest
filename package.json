@@ -1,7 +1,7 @@
 {
   "name": "@janiscommerce/sls-api-rest",
-  "version": "1.5.0",
-  "description": "An integration handler for Serverless and JANIS Rest APIs",
+  "version": "2.0.0",
+  "description": "An integration handler for Serverless and Janis Rest APIs",
   "main": "lib/index.js",
   "scripts": {
     "test": "export TEST_ENV=true; mocha --exit -R nyan --recursive tests/",
@@ -18,13 +18,13 @@
   "license": "ISC",
   "homepage": "https://github.com/janis-commerce/sls-api-rest#readme",
   "devDependencies": {
-    "eslint": "^5.16.0",
+    "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.20.2",
     "husky": "^2.4.1",
-    "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
-    "sinon": "^7.3.2"
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
+    "sinon": "^9.0.2"
   },
   "files": [
     "lib/"
@@ -33,7 +33,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "@janiscommerce/api": "^4.3.0",
+    "@janiscommerce/api": "^5.0.1",
     "@janiscommerce/sls-api-response": "^1.2.1",
     "amazon-api-gateway-querystring": "1.0.5"
   }
