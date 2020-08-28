@@ -11,13 +11,6 @@ An integration handler for Serverless and JANIS Rest APIs
 npm install @janiscommerce/sls-api-rest
 ```
 
-## ⚠️ **Breaking changes from version *2.0.0*** ⚠️
-*Since 2.0.0*
-
-API upgraded to v5. API Session store validations replaced with loactions
-
-For more information see [API](https://www.npmjs.com/package/@janiscommerce/api) and [API Session](https://www.npmjs.com/package/@janiscommerce/api-session)
-
 ## Dependencies
 
 This package only works properly with serverless-offline@5.9.0 or greater

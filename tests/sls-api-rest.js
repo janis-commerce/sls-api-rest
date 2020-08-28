@@ -7,7 +7,7 @@ const sandbox = require('sinon').createSandbox();
 const { ApiResponse } = require('@janiscommerce/sls-api-response');
 const { Dispatcher } = require('@janiscommerce/api');
 
-const { SlsApiRest } = require('..');
+const SlsApiRest = require('../lib/sls-api-rest');
 
 describe('SlsApiRest', () => {
 
@@ -83,8 +83,7 @@ describe('SlsApiRest', () => {
 			await SlsApiRest.handler({});
 
 			sandbox.assert.notCalled(getDispatcherStub);
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 500,
 				body: {
 					message: sandbox.match.string
@@ -307,8 +306,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -358,8 +356,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -415,8 +412,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -467,8 +463,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -519,8 +514,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -579,8 +573,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -631,8 +624,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 500,
 				body: {
 					message: 'Some error'
@@ -683,8 +675,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(apiResponseStub);
-			sandbox.assert.calledWithExactly(apiResponseStub, {
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
 				statusCode: 503,
 				body: {
 					message: 'Some error'

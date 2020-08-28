@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.0] - 2020-08-28
+### Added
+- GitHub Actions for build, coverage and publish
+
+### Changed
+- Updated `@janiscommerce/api` to `6.x.x`
+
 ## [2.1.1] - 2020-06-23
 ### Fixed
 - Dependency bug fix
