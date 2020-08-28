@@ -7,7 +7,7 @@ const sandbox = require('sinon').createSandbox();
 const { ApiResponse } = require('@janiscommerce/sls-api-response');
 const { Dispatcher } = require('@janiscommerce/api');
 
-const SlsApiRest = require('../lib/sls-api-rest');
+const { SlsApiRest } = require('../lib');
 
 describe('SlsApiRest', () => {
 

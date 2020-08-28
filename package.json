@@ -2,7 +2,7 @@
   "name": "@janiscommerce/sls-api-rest",
   "version": "2.1.1",
   "description": "An integration handler for Serverless and Janis Rest APIs",
-  "main": "lib/sls-api-rest.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "export TEST_ENV=true; mocha --exit -R nyan --recursive tests/",
     "test-ci": "nyc --reporter=lcov --reporter=text-summary mocha --exit --recursive tests/",
