@@ -574,6 +574,7 @@ describe('SlsApiRest', () => {
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
 			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
+				clientCode: 'fizzmod',
 				statusCode: 200,
 				body: {
 					foo: 'bar'
@@ -625,6 +626,65 @@ describe('SlsApiRest', () => {
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
 			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
+				statusCode: 500,
+				body: {
+					message: 'Some error'
+				}
+			});
+		});
+
+		it('Should return an error with the client code if the Dispatcher throws with a client', async () => {
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+
+			dispatcherStub.dispatch.throws(new Error('Some error'));
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
+			apiResponseStub.returns('the actual response');
+
+			const apiResponse = await SlsApiRest.handler({
+				requestPath: '/some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				body: {
+					someProp: 'baz'
+				},
+				authorizer: {
+					janisAuth: JSON.stringify({
+						clientId: 1,
+						clientCode: 'fizzmod'
+					})
+				}
+			});
+
+			assert.deepStrictEqual(apiResponse, 'the actual response');
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: 'some-entity/1/sub-entity/2',
+				method: 'post',
+				headers: {
+					'x-foo': 'bar'
+				},
+				cookies: {},
+				data: {
+					someProp: 'baz'
+				},
+				authenticationData: {
+					clientId: 1,
+					clientCode: 'fizzmod'
+				}
+			});
+
+			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
+				clientCode: 'fizzmod',
 				statusCode: 500,
 				body: {
 					message: 'Some error'
