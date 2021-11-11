@@ -586,17 +586,19 @@ describe('SlsApiRest', () => {
 
 		it('Should return an error if the Dispatcher throws', async () => {
 
+			const apiError = new Error('Some error');
+
 			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
 
-			dispatcherStub.dispatch.throws(new Error('Some error'));
+			dispatcherStub.dispatch.throws(apiError);
 
 			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
 			getDispatcherStub.returns(dispatcherStub);
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
+			apiResponseStub.throws(apiError);
 
-			const apiResponse = await SlsApiRest.handler({
+			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
@@ -605,9 +607,9 @@ describe('SlsApiRest', () => {
 				body: {
 					someProp: 'baz'
 				}
+			}), {
+				message: apiError.message
 			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
@@ -625,27 +627,24 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 500,
-				body: {
-					message: 'Some error'
-				}
-			});
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
 		});
 
 		it('Should return an error with the client code if the Dispatcher throws with a client', async () => {
 
+			const apiError = new Error('Some error');
+
 			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
 
-			dispatcherStub.dispatch.throws(new Error('Some error'));
+			dispatcherStub.dispatch.throws(apiError);
 
 			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
 			getDispatcherStub.returns(dispatcherStub);
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
+			apiResponseStub.throws(apiError);
 
-			const apiResponse = await SlsApiRest.handler({
+			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
@@ -660,9 +659,9 @@ describe('SlsApiRest', () => {
 						clientCode: 'fizzmod'
 					})
 				}
+			}), {
+				message: apiError.message
 			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
@@ -683,30 +682,24 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				clientCode: 'fizzmod',
-				statusCode: 500,
-				body: {
-					message: 'Some error'
-				}
-			});
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, 'fizzmod');
 		});
 
 		it('Should return an error with a custom statusCode if the Dispatcher throws with a code', async () => {
 
-			const error = new Error('Some error');
-			error.code = 503;
+			const apiError = new Error('Some error');
+			apiError.code = 503;
 
 			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.throws(error);
+			dispatcherStub.dispatch.throws(apiError);
 
 			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
 			getDispatcherStub.returns(dispatcherStub);
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
+			apiResponseStub.throws(apiError);
 
-			const apiResponse = await SlsApiRest.handler({
+			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
@@ -715,9 +708,9 @@ describe('SlsApiRest', () => {
 				body: {
 					someProp: 'baz'
 				}
+			}), {
+				message: apiError.message
 			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
 
 			sandbox.assert.calledOnce(getDispatcherStub);
 			sandbox.assert.calledWithExactly(getDispatcherStub, {
@@ -735,12 +728,7 @@ describe('SlsApiRest', () => {
 
 			sandbox.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 503,
-				body: {
-					message: 'Some error'
-				}
-			});
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
 		});
 	});
 
