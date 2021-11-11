@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.2.0] - 2021-11-11
+### Added
+- Added rawBody to rawData mapping
+- Implemented new versions of API and API Response that don't hide errors any more
+
 ## [3.1.0] - 2021-05-21
 ### Added
 - API Response now includes the client code to debug better on cloudwatch
