@@ -1,7 +1,8 @@
 # sls-api-rest
 
-[![Build Status](https://travis-ci.org/janis-commerce/sls-api-rest.svg?branch=master)](https://travis-ci.org/janis-commerce/sls-api-rest)
+![Build Status](https://github.com/janis-commerce/sls-api-rest/workflows/Build%20Status/badge.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/janis-commerce/sls-api-rest/badge.svg?branch=master)](https://coveralls.io/github/janis-commerce/sls-api-rest?branch=master)
+[![npm version](https://badge.fury.io/js/%40janiscommerce%2Fsls-api-rest.svg)](https://www.npmjs.com/package/@janiscommerce/sls-api-rest)
 
 An integration handler for Serverless and JANIS Rest APIs
 

@@ -15,6 +15,7 @@ application/json: |-
 
   {
     "body": $body,
+    "rawBody": "$util.escapeJavaScript($input.body).replaceAll("\\'", "'"),
     "method": "$context.httpMethod",
     "principalId": "$context.authorizer.principalId",
     "stage": "$context.stage",
