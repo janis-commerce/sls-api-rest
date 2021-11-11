@@ -117,6 +117,7 @@ describe('SlsApiRest', () => {
 				headers: {},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 		});
@@ -154,6 +155,7 @@ describe('SlsApiRest', () => {
 					foo: 'bar'
 				},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 		});
@@ -191,6 +193,7 @@ describe('SlsApiRest', () => {
 					foo: 'bar'
 				},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 		});
@@ -225,6 +228,7 @@ describe('SlsApiRest', () => {
 				headers: {},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 		});
@@ -255,6 +259,7 @@ describe('SlsApiRest', () => {
 				headers: {},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 		});
@@ -301,6 +306,7 @@ describe('SlsApiRest', () => {
 					sortBy: 'id',
 					sortDirection: 'asc'
 				},
+				rawData: undefined,
 				authenticationData: {}
 			});
 
@@ -351,6 +357,7 @@ describe('SlsApiRest', () => {
 				},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 
@@ -383,15 +390,18 @@ describe('SlsApiRest', () => {
 			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
 			apiResponseStub.returns('the actual response');
 
+			const body = {
+				someProp: 'baz'
+			};
+
 			const apiResponse = await SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
 				},
-				body: {
-					someProp: 'baz'
-				}
+				body,
+				rawBody: JSON.stringify(body)
 			});
 
 			assert.deepStrictEqual(apiResponse, 'the actual response');
@@ -404,9 +414,8 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {
-					someProp: 'baz'
-				},
+				data: body,
+				rawData: JSON.stringify(body),
 				authenticationData: {}
 			});
 
@@ -458,6 +467,7 @@ describe('SlsApiRest', () => {
 				},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 
@@ -509,6 +519,7 @@ describe('SlsApiRest', () => {
 				},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {}
 			});
 
@@ -565,6 +576,7 @@ describe('SlsApiRest', () => {
 				},
 				cookies: {},
 				data: {},
+				rawData: undefined,
 				authenticationData: {
 					clientId: 1,
 					clientCode: 'fizzmod'
@@ -598,15 +610,18 @@ describe('SlsApiRest', () => {
 			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
 			apiResponseStub.throws(apiError);
 
+			const body = {
+				someProp: 'baz'
+			};
+
 			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
 				},
-				body: {
-					someProp: 'baz'
-				}
+				body,
+				rawBody: JSON.stringify(body)
 			}), {
 				message: apiError.message
 			});
@@ -619,9 +634,8 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {
-					someProp: 'baz'
-				},
+				data: body,
+				rawData: JSON.stringify(body),
 				authenticationData: {}
 			});
 
@@ -644,15 +658,18 @@ describe('SlsApiRest', () => {
 			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
 			apiResponseStub.throws(apiError);
 
+			const body = {
+				someProp: 'baz'
+			};
+
 			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
 				},
-				body: {
-					someProp: 'baz'
-				},
+				body,
+				rawBody: JSON.stringify(body),
 				authorizer: {
 					janisAuth: JSON.stringify({
 						clientId: 1,
@@ -671,9 +688,8 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {
-					someProp: 'baz'
-				},
+				data: body,
+				rawData: JSON.stringify(body),
 				authenticationData: {
 					clientId: 1,
 					clientCode: 'fizzmod'
@@ -699,15 +715,18 @@ describe('SlsApiRest', () => {
 			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
 			apiResponseStub.throws(apiError);
 
+			const body = {
+				someProp: 'baz'
+			};
+
 			await assert.rejects(() => SlsApiRest.handler({
 				requestPath: '/some-entity/1/sub-entity/2',
 				method: 'post',
 				headers: {
 					'x-foo': 'bar'
 				},
-				body: {
-					someProp: 'baz'
-				}
+				body,
+				rawBody: JSON.stringify(body)
 			}), {
 				message: apiError.message
 			});
@@ -720,9 +739,8 @@ describe('SlsApiRest', () => {
 					'x-foo': 'bar'
 				},
 				cookies: {},
-				data: {
-					someProp: 'baz'
-				},
+				data: body,
+				rawData: JSON.stringify(body),
 				authenticationData: {}
 			});
 
