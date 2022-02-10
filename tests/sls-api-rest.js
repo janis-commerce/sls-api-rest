@@ -322,6 +322,70 @@ describe('SlsApiRest', () => {
 			});
 		});
 
+		it('Should pass the request arguments (with querystring and multiple sort) to the Dispatcher and map the dispatcher result', async () => {
+
+			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+			dispatcherStub.dispatch.resolves({
+				code: 200,
+				body: {
+					foo: 'bar'
+				},
+				extraProp: 'more foo'
+			});
+
+			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+			getDispatcherStub.returns(dispatcherStub);
+
+			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
+			apiResponseStub.returns('the actual response');
+
+			const apiResponse = await SlsApiRest.handler({
+				requestPath: '/some-entity/1/sub-entity/2',
+				headers: {
+					'x-foo': 'bar'
+				},
+				query: {
+					filters: {
+						name: ['foo', 'bar']
+					},
+					sortBy: ['name', 'id'],
+					sortDirection: [, 'asc']
+				}
+			});
+
+			assert.deepStrictEqual(apiResponse, 'the actual response');
+
+			sandbox.assert.calledOnce(getDispatcherStub);
+			sandbox.assert.calledWithExactly(getDispatcherStub, {
+				endpoint: 'some-entity/1/sub-entity/2',
+				method: 'get',
+				headers: {
+					'x-foo': 'bar'
+				},
+				cookies: {},
+				data: {
+					filters: {
+						name: { 0: 'foo', 1: 'bar' }
+					},
+					sortBy: { 0: 'name', 1: 'id' },
+					sortDirection: { 1: 'asc' }
+				},
+				rawData: undefined,
+				authenticationData: {}
+			});
+
+			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+
+			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
+				statusCode: 200,
+				body: {
+					foo: 'bar'
+				},
+				headers: undefined,
+				cookies: undefined
+			});
+		});
+
 		it('Should pass the request arguments (without querystring) to the Dispatcher and map the dispatcher result', async () => {
 
 			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
