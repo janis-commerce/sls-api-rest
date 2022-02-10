@@ -365,10 +365,10 @@ describe('SlsApiRest', () => {
 				cookies: {},
 				data: {
 					filters: {
-						name: { 0: 'foo', 1: 'bar' }
+						name: ['foo', 'bar']
 					},
-					sortBy: { 0: 'name', 1: 'id' },
-					sortDirection: { 1: 'asc' }
+					sortBy: ['name', 'id'],
+					sortDirection: [,'asc']
 				},
 				rawData: undefined,
 				authenticationData: {}
