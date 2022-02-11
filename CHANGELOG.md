@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.3.0] - 2022-02-11
+### Changed
+- Improve parsing queryParameters
+
 ## [3.2.0] - 2021-11-11
 ### Added
 - Added rawBody to rawData mapping
