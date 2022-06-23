@@ -2,10 +2,12 @@
 
 const assert = require('assert');
 
-const sandbox = require('sinon').createSandbox();
+const sinon = require('sinon');
 
 const { ApiResponse } = require('@janiscommerce/sls-api-response');
 const { Dispatcher } = require('@janiscommerce/api');
+
+const Events = require('@janiscommerce/events');
 
 const { SlsApiRest } = require('../lib');
 
@@ -70,747 +72,751 @@ describe('SlsApiRest', () => {
 
 	describe('Handler', () => {
 
+		beforeEach(() => {
+			sinon.stub(Events, 'emit');
+		});
+
 		afterEach(() => {
-			sandbox.restore();
+
+			sinon.assert.calledOnceWithExactly(Events.emit, 'janiscommerce.ended');
+
+			sinon.restore();
 		});
 
-		it('Should return an error if requestPath is not defined', async () => {
+		context('When requestPath is not defined', async () => {
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
+			it('Should return an error', async () => {
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
+				sinon.spy(SlsApiRest, 'getDispatcher');
 
-			await SlsApiRest.handler({});
+				sinon.stub(ApiResponse, 'send');
 
-			sandbox.assert.notCalled(getDispatcherStub);
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 500,
-				body: {
-					message: sandbox.match.string
-				}
+				await SlsApiRest.handler({});
+
+				sinon.assert.notCalled(SlsApiRest.getDispatcher);
+
+				sinon.assert.calledOnceWithExactly(ApiResponse.send, {
+					statusCode: 500,
+					body: {
+						message: sinon.match.string
+					}
+				});
 			});
+
 		});
 
-		it('Should pass the default http method (get) to the Dispatcher', async () => {
+		context('When requestPath is defined', async () => {
 
-			sandbox.stub(ApiResponse, 'send');
+			it('Should pass the default http method (get) to the Dispatcher', async () => {
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
+				sinon.stub(ApiResponse, 'send');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2'
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
 			});
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+			it('Should pass the parsed cookies (in lower case) to the Dispatcher', async () => {
 
-			await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2'
-			});
+				sinon.stub(ApiResponse, 'send');
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-		});
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
 
-		it('Should pass the parsed cookies (in lower case) to the Dispatcher', async () => {
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
 
-			sandbox.stub(ApiResponse, 'send');
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					headers: {
+						cookie: 'foo=bar'
+					}
+				});
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				headers: {
-					cookie: 'foo=bar'
-				}
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {
-					cookie: 'foo=bar'
-				},
-				cookies: {
-					foo: 'bar'
-				},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-		});
-
-		it('Should pass the parsed cookies (in upper case) to the Dispatcher', async () => {
-
-			sandbox.stub(ApiResponse, 'send');
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				headers: {
-					Cookie: 'foo=bar'
-				}
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {
-					Cookie: 'foo=bar'
-				},
-				cookies: {
-					foo: 'bar'
-				},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-		});
-
-		it('Should replace the path variables in the endpoint', async () => {
-
-			sandbox.stub(ApiResponse, 'send');
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			await SlsApiRest.handler({
-				requestPath: '/some-entity/{entityId}/sub-entity/{subEntityId}',
-				path: {
-					entityId: 1,
-					subEntityId: 2
-				}
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-		});
-
-		it('Should trim the first slash in the endpoint', async () => {
-
-			sandbox.stub(ApiResponse, 'send');
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			await SlsApiRest.handler({
-				requestPath: '/some-entity'
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity',
-				method: 'get',
-				headers: {},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-		});
-
-		it('Should pass the request arguments (with querystring) to the Dispatcher and map the dispatcher result', async () => {
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				},
-				extraProp: 'more foo'
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
-
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				headers: {
-					'x-foo': 'bar'
-				},
-				query: {
-					sortBy: 'id',
-					sortDirection: 'asc'
-				}
-			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {
-					sortBy: 'id',
-					sortDirection: 'asc'
-				},
-				rawData: undefined,
-				authenticationData: {}
-			});
-
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
-
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
-
-		it('Should pass the request arguments (with querystring and multiple sort) to the Dispatcher and map the dispatcher result', async () => {
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				},
-				extraProp: 'more foo'
-			});
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
-
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				headers: {
-					'x-foo': 'bar'
-				},
-				query: {
-					filters: {
-						name: ['foo', 'bar']
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {
+						cookie: 'foo=bar'
 					},
-					sortBy: ['name', 'id'],
-					sortDirection: [, 'asc']
-				}
-			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {
-					filters: {
-						name: ['foo', 'bar']
+					cookies: {
+						foo: 'bar'
 					},
-					sortBy: ['name', 'id'],
-					sortDirection: [,'asc']
-				},
-				rawData: undefined,
-				authenticationData: {}
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
 			});
 
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+			it('Should pass the parsed cookies (in upper case) to the Dispatcher', async () => {
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
+				sinon.stub(ApiResponse, 'send');
 
-		it('Should pass the request arguments (without querystring) to the Dispatcher and map the dispatcher result', async () => {
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				},
-				extraProp: 'more foo'
-			});
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					headers: {
+						Cookie: 'foo=bar'
+					}
+				});
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
-
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				headers: {
-					'x-foo': 'bar'
-				}
-			});
-
-			assert.deepStrictEqual(apiResponse, 'the actual response');
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'get',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {
+						Cookie: 'foo=bar'
+					},
+					cookies: {
+						foo: 'bar'
+					},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
 			});
 
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+			it('Should replace the path variables in the endpoint', async () => {
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
+				sinon.stub(ApiResponse, 'send');
 
-		it('Should pass the request arguments (with body) to the Dispatcher and map the dispatcher result', async () => {
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				},
-				extraProp: 'more foo'
-			});
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/{entityId}/sub-entity/{subEntityId}',
+					path: {
+						entityId: 1,
+						subEntityId: 2
+					}
+				});
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
-
-			const body = {
-				someProp: 'baz'
-			};
-
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				body,
-				rawBody: JSON.stringify(body)
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
 			});
 
-			assert.deepStrictEqual(apiResponse, 'the actual response');
+			it('Should trim the first slash in the endpoint', async () => {
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: body,
-				rawData: JSON.stringify(body),
-				authenticationData: {}
+				sinon.stub(ApiResponse, 'send');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				await SlsApiRest.handler({
+					requestPath: '/some-entity'
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity',
+					method: 'get',
+					headers: {},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
 			});
 
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+			it('Should pass the request arguments (with querystring) to the Dispatcher and map the dispatcher result', async () => {
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					},
+					extraProp: 'more foo'
+				});
 
-		it('Should pass the request arguments (without body) to the Dispatcher and map the dispatcher result', async () => {
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				},
-				extraProp: 'more foo'
-			});
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					headers: {
+						'x-foo': 'bar'
+					},
+					query: {
+						sortBy: 'id',
+						sortDirection: 'asc'
+					}
+				});
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+				assert.deepStrictEqual(apiResponse, 'the actual response');
 
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				}
-			});
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {
+						sortBy: 'id',
+						sortDirection: 'asc'
+					},
+					rawData: undefined,
+					authenticationData: {}
+				});
 
-			assert.deepStrictEqual(apiResponse, 'the actual response');
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
-			});
-
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
-
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
-
-		it('Should pass the request arguments (without authentication data) to the Dispatcher and map the dispatcher result', async () => {
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+			it('Should pass the request arguments (with querystring and multiple sort) to the Dispatcher and map the dispatcher result', async () => {
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					},
+					extraProp: 'more foo'
+				});
 
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				authorizer: {}
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					headers: {
+						'x-foo': 'bar'
+					},
+					query: {
+						filters: {
+							name: ['foo', 'bar']
+						},
+						sortBy: ['name', 'id'],
+						// eslint-disable-next-line no-sparse-arrays
+						sortDirection: [, 'asc']
+					}
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {
+						filters: {
+							name: ['foo', 'bar']
+						},
+						sortBy: ['name', 'id'],
+						// eslint-disable-next-line no-sparse-arrays
+						sortDirection: [, 'asc']
+					},
+					rawData: undefined,
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
 
-			assert.deepStrictEqual(apiResponse, 'the actual response');
+			it('Should pass the request arguments (without querystring) to the Dispatcher and map the dispatcher result', async () => {
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {}
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					},
+					extraProp: 'more foo'
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					headers: {
+						'x-foo': 'bar'
+					}
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
 
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+			it('Should pass the request arguments (with body) to the Dispatcher and map the dispatcher result', async () => {
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					},
+					extraProp: 'more foo'
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const body = {
+					someProp: 'baz'
+				};
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					body,
+					rawBody: JSON.stringify(body)
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: body,
+					rawData: JSON.stringify(body),
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
-		});
 
-		it('Should pass the request arguments (with authentication data) to the Dispatcher and map the dispatcher result', async () => {
+			it('Should pass the request arguments (without body) to the Dispatcher and map the dispatcher result', async () => {
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.resolves({
-				code: 200,
-				body: {
-					foo: 'bar'
-				}
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					},
+					extraProp: 'more foo'
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					}
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+			it('Should pass the request arguments (without authentication data) to the Dispatcher and map the dispatcher result', async () => {
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'send');
-			apiResponseStub.returns('the actual response');
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
 
-			const apiResponse = await SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				authorizer: {
-					janisAuth: JSON.stringify({
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					authorizer: {}
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
+			});
+
+			it('Should pass the request arguments (with authentication data) to the Dispatcher and map the dispatcher result', async () => {
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'send');
+				apiResponseStub.returns('the actual response');
+
+				const apiResponse = await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					authorizer: {
+						janisAuth: JSON.stringify({
+							clientId: 1,
+							clientCode: 'fizzmod'
+						})
+					}
+				});
+
+				assert.deepStrictEqual(apiResponse, 'the actual response');
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {
 						clientId: 1,
 						clientCode: 'fizzmod'
-					})
-				}
+					}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, {
+					clientCode: 'fizzmod',
+					statusCode: 200,
+					body: {
+						foo: 'bar'
+					},
+					headers: undefined,
+					cookies: undefined
+				});
 			});
 
-			assert.deepStrictEqual(apiResponse, 'the actual response');
+			it('Should return an error if the Dispatcher throws', async () => {
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: {},
-				rawData: undefined,
-				authenticationData: {
-					clientId: 1,
-					clientCode: 'fizzmod'
-				}
+				const apiError = new Error('Some error');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+
+				dispatcherStub.dispatch.throws(apiError);
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'sendError');
+				apiResponseStub.throws(apiError);
+
+				const body = {
+					someProp: 'baz'
+				};
+
+				await assert.rejects(() => SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					body,
+					rawBody: JSON.stringify(body)
+				}), {
+					message: apiError.message
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: body,
+					rawData: JSON.stringify(body),
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
 			});
 
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
+			it('Should return an error with the client code if the Dispatcher throws with a client', async () => {
 
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, {
-				clientCode: 'fizzmod',
-				statusCode: 200,
-				body: {
-					foo: 'bar'
-				},
-				headers: undefined,
-				cookies: undefined
-			});
-		});
+				const apiError = new Error('Some error');
 
-		it('Should return an error if the Dispatcher throws', async () => {
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
 
-			const apiError = new Error('Some error');
+				dispatcherStub.dispatch.throws(apiError);
 
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
 
-			dispatcherStub.dispatch.throws(apiError);
+				const apiResponseStub = sinon.stub(ApiResponse, 'sendError');
+				apiResponseStub.throws(apiError);
 
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
+				const body = {
+					someProp: 'baz'
+				};
 
-			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
-			apiResponseStub.throws(apiError);
+				await assert.rejects(() => SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					body,
+					rawBody: JSON.stringify(body),
+					authorizer: {
+						janisAuth: JSON.stringify({
+							clientId: 1,
+							clientCode: 'fizzmod'
+						})
+					}
+				}), {
+					message: apiError.message
+				});
 
-			const body = {
-				someProp: 'baz'
-			};
-
-			await assert.rejects(() => SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				body,
-				rawBody: JSON.stringify(body)
-			}), {
-				message: apiError.message
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: body,
-				rawData: JSON.stringify(body),
-				authenticationData: {}
-			});
-
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
-
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
-		});
-
-		it('Should return an error with the client code if the Dispatcher throws with a client', async () => {
-
-			const apiError = new Error('Some error');
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-
-			dispatcherStub.dispatch.throws(apiError);
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
-			apiResponseStub.throws(apiError);
-
-			const body = {
-				someProp: 'baz'
-			};
-
-			await assert.rejects(() => SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				body,
-				rawBody: JSON.stringify(body),
-				authorizer: {
-					janisAuth: JSON.stringify({
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: body,
+					rawData: JSON.stringify(body),
+					authenticationData: {
 						clientId: 1,
 						clientCode: 'fizzmod'
-					})
-				}
-			}), {
-				message: apiError.message
+					}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, apiError, 'fizzmod');
 			});
 
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: body,
-				rawData: JSON.stringify(body),
-				authenticationData: {
-					clientId: 1,
-					clientCode: 'fizzmod'
-				}
+			it('Should return an error with a custom statusCode if the Dispatcher throws with a code', async () => {
+
+				const apiError = new Error('Some error');
+				apiError.code = 503;
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+				dispatcherStub.dispatch.throws(apiError);
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const apiResponseStub = sinon.stub(ApiResponse, 'sendError');
+				apiResponseStub.throws(apiError);
+
+				const body = {
+					someProp: 'baz'
+				};
+
+				await assert.rejects(() => SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					body,
+					rawBody: JSON.stringify(body)
+				}), {
+					message: apiError.message
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'post',
+					headers: {
+						'x-foo': 'bar'
+					},
+					cookies: {},
+					data: body,
+					rawData: JSON.stringify(body),
+					authenticationData: {}
+				});
+
+				sinon.assert.calledOnce(dispatcherStub.dispatch);
+
+				sinon.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
+
 			});
-
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
-
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, 'fizzmod');
-		});
-
-		it('Should return an error with a custom statusCode if the Dispatcher throws with a code', async () => {
-
-			const apiError = new Error('Some error');
-			apiError.code = 503;
-
-			const dispatcherStub = sandbox.stub(Dispatcher.prototype);
-			dispatcherStub.dispatch.throws(apiError);
-
-			const getDispatcherStub = sandbox.stub(SlsApiRest, 'getDispatcher');
-			getDispatcherStub.returns(dispatcherStub);
-
-			const apiResponseStub = sandbox.stub(ApiResponse, 'sendError');
-			apiResponseStub.throws(apiError);
-
-			const body = {
-				someProp: 'baz'
-			};
-
-			await assert.rejects(() => SlsApiRest.handler({
-				requestPath: '/some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				body,
-				rawBody: JSON.stringify(body)
-			}), {
-				message: apiError.message
-			});
-
-			sandbox.assert.calledOnce(getDispatcherStub);
-			sandbox.assert.calledWithExactly(getDispatcherStub, {
-				endpoint: 'some-entity/1/sub-entity/2',
-				method: 'post',
-				headers: {
-					'x-foo': 'bar'
-				},
-				cookies: {},
-				data: body,
-				rawData: JSON.stringify(body),
-				authenticationData: {}
-			});
-
-			sandbox.assert.calledOnce(dispatcherStub.dispatch);
-
-			sandbox.assert.calledOnceWithExactly(apiResponseStub, apiError, undefined);
 		});
 	});
 
