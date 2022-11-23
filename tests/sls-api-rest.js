@@ -9,9 +9,22 @@ const { Dispatcher } = require('@janiscommerce/api');
 
 const Events = require('@janiscommerce/events');
 
+const RouterFetcher = require('@janiscommerce/router-fetcher');
+
 const { SlsApiRest } = require('../lib');
 
 describe('SlsApiRest', () => {
+
+	const originalEnv = { ...process.env };
+
+	beforeEach(() => {
+		process.env.JANIS_SERVICE_NAME = 'catalog';
+	});
+
+	afterEach(() => {
+		process.env = { ...originalEnv };
+		sinon.restore();
+	});
 
 	describe('getDispatcher', () => {
 
@@ -818,6 +831,68 @@ describe('SlsApiRest', () => {
 
 			});
 		});
+
+		context('When received Janis namespace and method', () => {
+
+			const routerFetcherResolves = (endpoint, httpMethod) => {
+				sinon.stub(RouterFetcher.prototype, 'getEndpoint')
+					.resolves({
+						endpoint, httpMethod
+					});
+			};
+
+			beforeEach(() => {
+
+			});
+
+			it('Should use RouterFetcher to find requestPath and dispatch the Api', async () => {
+
+				const id = '637e0ff1e6527714ba298d36';
+
+				routerFetcherResolves('product/{id}', 'put');
+
+				sinon.stub(ApiResponse, 'send');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: { id }
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				const authenticationData = {
+					userId: '637e109c8d34dac7963bd0b0',
+					profileId: '637e10bd470e17f045a7203a',
+					serviceName: 'some-grate-service'
+				};
+
+				await SlsApiRest.handler({
+					namespace: 'product',
+					method: 'update',
+					path: { id },
+					body: { price: 250 },
+					authenticationData
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: `product/${id}`,
+					method: 'put',
+					headers: {},
+					cookies: {},
+					data: { price: 250 },
+					rawData: undefined,
+					authenticationData
+				});
+
+				sinon.assert.calledOnceWithExactly(RouterFetcher.prototype.getEndpoint, 'catalog', 'product', 'update');
+
+			});
+
+		});
+
 	});
 
 });
