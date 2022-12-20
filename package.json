@@ -34,8 +34,8 @@
     "test": "tests"
   },
   "dependencies": {
-    "@janiscommerce/api": "^6.5.0",
-    "@janiscommerce/events": "^0.1.0",
+    "@janiscommerce/api": "^6.6.0",
+    "@janiscommerce/events": "^0.2.0",
     "@janiscommerce/router-fetcher": "^2.1.2",
     "@janiscommerce/sls-api-response": "^1.5.0",
     "qs": "^6.10.3"
