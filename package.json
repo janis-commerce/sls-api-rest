@@ -1,6 +1,6 @@
 {
   "name": "@janiscommerce/sls-api-rest",
-  "version": "3.5.1",
+  "version": "4.0.0",
   "description": "An integration handler for Serverless and Janis Rest APIs",
   "main": "lib/index.js",
   "scripts": {
