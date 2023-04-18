@@ -19,13 +19,13 @@
   "license": "ISC",
   "homepage": "https://github.com/janis-commerce/sls-api-rest#readme",
   "devDependencies": {
-    "eslint": "^8.2.0",
+    "eslint": "^8.38.0",
     "eslint-config-airbnb-base": "^13.2.0",
-    "eslint-plugin-import": "^2.20.2",
-    "husky": "^7.0.4",
-    "mocha": "^9.2.2",
+    "eslint-plugin-import": "^2.27.5",
+    "husky": "^8.0.3",
+    "mocha": "^10.2.0",
     "nyc": "^15.1.0",
-    "sinon": "^13.0.2"
+    "sinon": "^15.0.3"
   },
   "files": [
     "lib/"
@@ -34,10 +34,10 @@
     "test": "tests"
   },
   "dependencies": {
-    "@janiscommerce/api": "^6.6.0",
+    "@janiscommerce/api": "^7.0.0",
     "@janiscommerce/events": "^0.2.0",
     "@janiscommerce/router-fetcher": "^2.1.2",
     "@janiscommerce/sls-api-response": "^1.5.0",
-    "qs": "^6.10.3"
+    "qs": "^6.11.1"
   }
 }
