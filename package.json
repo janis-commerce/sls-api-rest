@@ -36,6 +36,7 @@
   "dependencies": {
     "@janiscommerce/api": "^8.0.0",
     "@janiscommerce/events": "^0.2.0",
+    "@janiscommerce/log": "^5.0.12",
     "@janiscommerce/router-fetcher": "^2.1.2",
     "@janiscommerce/sls-api-response": "^1.5.0",
     "qs": "^6.11.1"

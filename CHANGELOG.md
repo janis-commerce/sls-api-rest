@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.0.1] - 2024-06-19
+### Added
+- Calling `Log.start()` when `handler()` is called to ensure end Trace Layer Extension
+
 ## [5.0.0] - 2023-09-18
 ### Changed
 - Update [@janiscommerce/api](https://www.npmjs.com/package/@janiscommerce/api) to version 8.0.0

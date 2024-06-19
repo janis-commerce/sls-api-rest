@@ -8,6 +8,7 @@ const { ApiResponse } = require('@janiscommerce/sls-api-response');
 const { Dispatcher } = require('@janiscommerce/api');
 
 const Events = require('@janiscommerce/events');
+const Log = require('@janiscommerce/log');
 
 const RouterFetcher = require('@janiscommerce/router-fetcher');
 
@@ -87,11 +88,13 @@ describe('SlsApiRest', () => {
 
 		beforeEach(() => {
 			sinon.stub(Events, 'emit');
+			sinon.stub(Log, 'start');
 		});
 
 		afterEach(() => {
 
 			sinon.assert.calledOnceWithExactly(Events.emit, 'janiscommerce.ended');
+			sinon.assert.calledOnceWithExactly(Log.start);
 
 			sinon.restore();
 		});
