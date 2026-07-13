@@ -121,6 +121,45 @@ describe('SlsApiRest', () => {
 
 		});
 
+		context('When the Lambda context is received', async () => {
+
+			const handleWithContext = async context => {
+
+				sinon.stub(ApiResponse, 'send');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {}
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2'
+				}, context);
+			};
+
+			it('Should set the AWS_LAMBDA_REQUEST_ID env var with the context awsRequestId', async () => {
+
+				await handleWithContext({ awsRequestId: 'test-request-id' });
+
+				assert.strictEqual(process.env.AWS_LAMBDA_REQUEST_ID, 'test-request-id');
+			});
+
+			it('Should set the AWS_LAMBDA_REQUEST_ID env var as empty if no context is received', async () => {
+
+				process.env.AWS_LAMBDA_REQUEST_ID = 'stale-request-id';
+
+				await handleWithContext();
+
+				assert.strictEqual(process.env.AWS_LAMBDA_REQUEST_ID, '');
+			});
+
+		});
+
 		context('When requestPath is defined', async () => {
 
 			it('Should pass the default http method (get) to the Dispatcher', async () => {

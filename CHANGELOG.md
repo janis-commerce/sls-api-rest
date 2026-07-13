@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `handler()` now receives the AWS Lambda context and sets the `AWS_LAMBDA_REQUEST_ID` env var with the `awsRequestId` on every invocation
 
 ## [5.0.1] - 2024-06-19
 ### Added

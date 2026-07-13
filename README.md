@@ -26,6 +26,10 @@ const { SlsApiRest } = require('@janiscommerce/sls-api-rest');
 module.exports.handler = (...args) => SlsApiRest.handler(...args);
 ```
 
+### Lambda request ID
+
+`SlsApiRest.handler(event, context)` receives the AWS Lambda context and sets the `AWS_LAMBDA_REQUEST_ID` env var with the `context.awsRequestId` on every invocation (or an empty string if no context is received). Packages like [@janiscommerce/mongodb](https://www.npmjs.com/package/@janiscommerce/mongodb) use it to tag each DB operation with the exact invocation that originated it.
+
 
 ## Function minimal configuration
 
