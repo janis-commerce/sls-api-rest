@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-10-22
+### Added
+- `handler()` now passes the event `identity.sourceIp` to the Dispatcher as `sourceIp`
+
 ## [5.1.0] - 2026-07-13
 ### Added
 - `handler()` now receives the AWS Lambda context and sets the `AWS_LAMBDA_REQUEST_ID` env var with the `awsRequestId` on every invocation
