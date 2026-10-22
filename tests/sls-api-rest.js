@@ -189,7 +189,43 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
+				});
+			});
+
+			it('Should pass the identity sourceIp to the Dispatcher', async () => {
+
+				sinon.stub(ApiResponse, 'send');
+
+				const dispatcherStub = sinon.stub(Dispatcher.prototype);
+
+				dispatcherStub.dispatch.resolves({
+					code: 200,
+					body: {
+						foo: 'bar'
+					}
+				});
+
+				sinon.stub(SlsApiRest, 'getDispatcher')
+					.returns(dispatcherStub);
+
+				await SlsApiRest.handler({
+					requestPath: '/some-entity/1/sub-entity/2',
+					identity: {
+						sourceIp: '192.0.2.10'
+					}
+				});
+
+				sinon.assert.calledOnceWithExactly(SlsApiRest.getDispatcher, {
+					endpoint: 'some-entity/1/sub-entity/2',
+					method: 'get',
+					headers: {},
+					cookies: {},
+					data: {},
+					rawData: undefined,
+					authenticationData: {},
+					sourceIp: '192.0.2.10'
 				});
 			});
 
@@ -226,7 +262,8 @@ describe('SlsApiRest', () => {
 					},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 			});
 
@@ -263,7 +300,8 @@ describe('SlsApiRest', () => {
 					},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 			});
 
@@ -297,7 +335,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 			});
 
@@ -327,7 +366,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 			});
 
@@ -373,7 +413,8 @@ describe('SlsApiRest', () => {
 						sortDirection: 'asc'
 					},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -438,7 +479,8 @@ describe('SlsApiRest', () => {
 						sortDirection: [, 'asc']
 					},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -488,7 +530,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -545,7 +588,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: body,
 					rawData: JSON.stringify(body),
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -596,7 +640,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -647,7 +692,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: {},
 					rawData: undefined,
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -706,7 +752,8 @@ describe('SlsApiRest', () => {
 					authenticationData: {
 						clientId: 1,
 						clientCode: 'fizzmod'
-					}
+					},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -761,7 +808,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: body,
 					rawData: JSON.stringify(body),
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -817,7 +865,8 @@ describe('SlsApiRest', () => {
 					authenticationData: {
 						clientId: 1,
 						clientCode: 'fizzmod'
-					}
+					},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -864,7 +913,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: body,
 					rawData: JSON.stringify(body),
-					authenticationData: {}
+					authenticationData: {},
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnce(dispatcherStub.dispatch);
@@ -926,7 +976,8 @@ describe('SlsApiRest', () => {
 					cookies: {},
 					data: { price: 250 },
 					rawData: undefined,
-					authenticationData
+					authenticationData,
+					sourceIp: undefined
 				});
 
 				sinon.assert.calledOnceWithExactly(RouterFetcher.prototype.getEndpoint, 'catalog', 'product', 'update');
